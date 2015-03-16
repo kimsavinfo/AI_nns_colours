@@ -1,0 +1,116 @@
+<html>
+	<head>
+		<title>IA 01 - Plus proche Voisin classique</title>
+
+		<script type="text/javascript"> 
+		//<![CDATA[ 
+
+		var sample = [
+			{
+				x: 50,
+				y: 50,
+				color: [255, 0, 0]
+			}
+		];
+
+		function init()
+		{
+			var canvas = document.getElementById("canvas");
+			canvas.addEventListener("mousedown", addPoint, false);
+
+			drawColorZones();
+			drawSamplePoints();
+		}
+		
+		function drawColorZones()
+		{
+			var canvas = document.getElementById('canvas');
+			var context = canvas.getContext("2d");
+			var imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+			var pixels = imgData.data;
+
+			for (var x = 0; x < canvas.width ; x++) 
+			{
+				for (var y = 0; y < canvas.height; y++) 
+				{
+					// Pixel est coupé en 4 sections, d'où le *4
+					var pixelIndex = (y * canvas.width + x) * 4;
+
+					pixels[pixelIndex] = 255; // R
+					pixels[pixelIndex+1] = 0; // V
+					pixels[pixelIndex+2] = 0; // B
+					pixels[pixelIndex+3] = 255; // opacité
+
+					var distancePointRef = getDistance(x, sample[0].x, y, sample[0].y );
+
+					for (var i = 0; i < sample.length; i++) 
+					{
+						var samplePoint = sample[i];
+						var distancePoint = getDistance(x, samplePoint.x, y, samplePoint.y );
+						
+						if(distancePoint < distancePointRef)
+						{
+							pixels[pixelIndex] = samplePoint.color[0];
+							pixels[pixelIndex+1] = samplePoint.color[1];
+							pixels[pixelIndex+2] = samplePoint.color[2];
+
+							distancePointRef = distancePoint;
+						}
+					}
+				}
+			}
+			context.putImageData(imgData, 0, 0);
+		}
+
+		function getDistance(x1, x2, y1, y2)
+		{	
+			return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+		}
+
+		function drawSamplePoints()
+		{
+			var canvas = document.getElementById('canvas');
+			var context = canvas.getContext("2d");
+
+			for (var i = 0; i < sample.length; i++) 
+			{
+				var samplePoint = sample[i];
+
+				context.fillStyle = "#000";
+				context.fillRect(samplePoint.x, samplePoint.y, 5, 5);
+			}
+		}
+
+		function addPoint(event)
+		{
+			var sampleNew = {
+				x: event.pageX,
+				y: event.pageY,
+				color: [getRandomColor(), getRandomColor(), getRandomColor()]
+			};
+
+			sample.push(sampleNew);
+			
+			drawColorZones();
+			drawSamplePoints();	
+		}
+
+		function getRandomColor(min, max) 
+		{
+			return getRandomInt(0, 255);
+		}
+
+		function getRandomInt(min, max) 
+		{
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+
+		//]]> 
+		</script> 
+	</head>
+	<body onload="init();">
+		  <canvas id="canvas" width="800" height="600">
+		  		alternative content
+		  </canvas>
+	</body>
+</html>
